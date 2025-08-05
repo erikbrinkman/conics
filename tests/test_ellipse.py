@@ -67,3 +67,25 @@ def test_circle_not_circle():
 
     with np.testing.assert_raises(ValueError):
         c1.to_circle()
+
+
+def test_ellipse_halfplane_intersection_area() -> None:
+    ellipse = Ellipse([0, 0], [2, 1], 0.0)
+    # cuts the ellipse in half, so half the area
+    assert np.isclose(ellipse.halfplane_intersection_area([1, 1, 0]), np.pi)
+    # more of the ellipse is in the positive, so should be in (pi, 2 pi)
+    assert np.isclose(ellipse.halfplane_intersection_area([1, 1, 1]), 4.9, atol=0.1)
+    # outside of ellipse on positive size, so full area
+    assert np.isclose(ellipse.halfplane_intersection_area([1, 1, 3]), 2 * np.pi)
+    # less of the ellipse is in the positive, so should be in (0, pi)
+    assert np.isclose(ellipse.halfplane_intersection_area([1, 1, -1]), 1.4, atol=0.1)
+    # outside of ellipse on negative side, so no area
+    assert np.isclose(ellipse.halfplane_intersection_area([1, 1, -3]), 0)
+
+
+def test_circle_halfplane_intersection_area() -> None:
+    circle = Ellipse([0, 0], [1, 1], 0.0)
+    # tangent, so should be zero
+    assert np.isclose(circle.halfplane_intersection_area([1, 0, -1]), 0)
+    # top corner of circle, so quarter circle area (pi/4) less that triangle area (1/2)
+    assert np.isclose(circle.halfplane_intersection_area([1, 1, -1]), np.pi / 4 - 1 / 2)
